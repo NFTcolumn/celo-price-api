@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Price Aggregator - Celo/Ubeswap</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>💱 Crypto Price Aggregator</h1>
+                <p class="subtitle">Real-time Celo token prices via Ubeswap</p>
+            </div>
+            <div class="api-status">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Connecting...</span>
+            </div>
+        </header>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="stat-card">
+                <div class="stat-label">CELO Price</div>
+                <div class="stat-value" id="celoPrice">--</div>
+                <div class="stat-change" id="celoCurrency">USD</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cache Hits</div>
+                <div class="stat-value" id="cacheHits">--</div>
+                <div class="stat-change">requests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">API Uptime</div>
+                <div class="stat-value" id="uptime">--</div>
+                <div class="stat-change">seconds</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Token Price Lookup -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>🔍 Token Price Lookup</h2>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <label for="tokenAddress">Token Address</label>
+                        <input
+                            type="text"
+                            id="tokenAddress"
+                            placeholder="0x..."
+                            value="0x471EcE3750Da237f93B8E339c536989b8978a438"
+                        >
+                    </div>
+                    <div class="input-group">
+                        <label for="currency">Currency</label>
+                        <select id="currency">
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="GBP">GBP</option>
+                            <option value="JPY">JPY</option>
+                            <option value="CNY">CNY</option>
+                            <option value="INR">INR</option>
+                            <option value="BRL">BRL</option>
+                            <option value="CAD">CAD</option>
+                            <option value="AUD">AUD</option>
+                            <option value="MXN">MXN</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="getTokenPrice()">
+                        Get Price
+                    </button>
+
+                    <!-- Price Result -->
+                    <div id="priceResult" class="result-container" style="display: none;">
+                        <div class="result-header">
+                            <h3 id="tokenSymbol">--</h3>
+                            <span class="badge" id="sourceBadge">--</span>
+                        </div>
+                        <div class="price-display">
+                            <div class="main-price">
+                                <span class="currency-symbol" id="currencySymbol">$</span>
+                                <span id="mainPrice">0.00</span>
+                            </div>
+                            <div class="price-details">
+                                <div class="detail-item">
+                                    <span class="label">Price in USD:</span>
+                                    <span class="value" id="priceUsd">--</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Price in CELO:</span>
+                                    <span class="value" id="priceCelo">--</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Tokens per CELO:</span>
+                                    <span class="value" id="tokensPerCelo">--</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Method:</span>
+                                    <span class="value" id="method">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Multi-source comparison -->
+                        <div id="sourcesComparison" class="sources-grid"></div>
+                    </div>
+
+                    <!-- Loading -->
+                    <div id="priceLoading" class="loading" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Fetching price data...</p>
+                    </div>
+
+                    <!-- Error -->
+                    <div id="priceError" class="error-message" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Token Value Calculator -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>💰 Token Value Calculator</h2>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <label for="valueTokenAddress">Token Address</label>
+                        <input
+                            type="text"
+                            id="valueTokenAddress"
+                            placeholder="0x..."
+                            value="0x471EcE3750Da237f93B8E339c536989b8978a438"
+                        >
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="tokenAmount">Amount</label>
+                            <input
+                                type="number"
+                                id="tokenAmount"
+                                placeholder="100"
+                                value="100"
+                                min="0"
+                                step="any"
+                            >
+                        </div>
+                        <div class="input-group">
+                            <label for="valueCurrency">Currency</label>
+                            <select id="valueCurrency">
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="JPY">JPY</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="calculateValue()">
+                        Calculate Value
+                    </button>
+
+                    <!-- Value Result -->
+                    <div id="valueResult" class="result-container" style="display: none;">
+                        <div class="value-display">
+                            <div class="amount-info">
+                                <span id="valueAmount">--</span>
+                                <span id="valueTokenSymbol">--</span>
+                            </div>
+                            <div class="equals">=</div>
+                            <div class="total-value">
+                                <span class="currency-symbol" id="valueCurrencySymbol">$</span>
+                                <span id="totalValue">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="valueLoading" class="loading" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Calculating...</p>
+                    </div>
+
+                    <div id="valueError" class="error-message" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Swap Quote -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>🔄 Swap Quote</h2>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <label for="tokenIn">Token In</label>
+                        <select id="tokenIn" class="token-select">
+                            <option value="">Custom address...</option>
+                            <option value="0x471EcE3750Da237f93B8E339c536989b8978a438" selected>CELO</option>
+                            <option value="0x765DE816845861e75A25fCA122bb6898B8B1282a">cUSD</option>
+                            <option value="0xD8763CBa276a3738E6DE85b4b3bF5FDed6D6cA73">cEUR</option>
+                            <option value="0xe8537a3d056DA446677B9E9d6c5dB704EaAb4787">cREAL</option>
+                            <option value="0xcebA9300f2b948710d2653dD7B07f33A8B32118C">USDC</option>
+                        </select>
+                        <input type="text" id="tokenInCustom" placeholder="Or enter custom address" style="display: none; margin-top: 10px;">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="amountIn">Amount In</label>
+                        <input
+                            type="number"
+                            id="amountIn"
+                            placeholder="1"
+                            value="1"
+                            min="0"
+                            step="any"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="tokenOut">Token Out</label>
+                        <select id="tokenOut" class="token-select">
+                            <option value="">Custom address...</option>
+                            <option value="0x471EcE3750Da237f93B8E339c536989b8978a438">CELO</option>
+                            <option value="0x765DE816845861e75A25fCA122bb6898B8B1282a" selected>cUSD</option>
+                            <option value="0xD8763CBa276a3738E6DE85b4b3bF5FDed6D6cA73">cEUR</option>
+                            <option value="0xe8537a3d056DA446677B9E9d6c5dB704EaAb4787">cREAL</option>
+                            <option value="0xcebA9300f2b948710d2653dD7B07f33A8B32118C">USDC</option>
+                        </select>
+                        <input type="text" id="tokenOutCustom" placeholder="Or enter custom address" style="display: none; margin-top: 10px;">
+                    </div>
+
+                    <button class="btn btn-primary" onclick="getSwapQuote()">
+                        Get Quote
+                    </button>
+
+                    <!-- Swap Result -->
+                    <div id="swapResult" class="result-container" style="display: none;">
+                        <div class="swap-display">
+                            <div class="swap-in">
+                                <div class="swap-amount" id="swapAmountIn">--</div>
+                                <div class="swap-token" id="swapTokenIn">--</div>
+                            </div>
+                            <div class="swap-arrow">→</div>
+                            <div class="swap-out">
+                                <div class="swap-amount" id="swapAmountOut">--</div>
+                                <div class="swap-token" id="swapTokenOut">--</div>
+                            </div>
+                        </div>
+                        <div class="swap-details">
+                            <div class="detail-item">
+                                <span class="label">Rate:</span>
+                                <span class="value" id="swapRate">--</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Path:</span>
+                                <span class="value" id="swapPath">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="swapLoading" class="loading" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Simulating swap...</p>
+                    </div>
+
+                    <div id="swapError" class="error-message" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Common Tokens -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>📋 Common Tokens</h2>
+                    <button class="btn btn-secondary btn-sm" onclick="loadCommonTokens()">Refresh</button>
+                </div>
+                <div class="card-body">
+                    <div id="commonTokens" class="tokens-grid">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading tokens...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by Ubeswap & DexScreener | API running on port 3005</p>
+            <p class="api-link">API Docs: <a href="http://localhost:3005" target="_blank">http://localhost:3005</a></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

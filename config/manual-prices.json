@@ -1,0 +1,11 @@
+{
+  "0x000be46901ea6f7ac2c1418d158f2f0a80992c07": {
+    "symbol": "PONY",
+    "priceCelo": 0.0000000000435,
+    "priceUsd": 0.00000000000503,
+    "tokensPerCelo": 22995360000,
+    "lastUpdated": "2025-12-27",
+    "source": "manual-v3-pool",
+    "note": "V3 pool at https://app.ubeswap.org/#/pools/6251 - Calculated from reserves: 624.901 CELO / 14.37T PONY"
+  }
+}
