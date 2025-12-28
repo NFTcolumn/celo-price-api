@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: crypto-price-aggregator
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: CELO_RPC_URL
+        value: https://forno.celo.org
+      - key: CACHE_TTL
+        value: 30
+      - key: DEFAULT_SWAP_AMOUNT
+        value: 1
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /health
